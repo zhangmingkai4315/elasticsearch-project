@@ -1,0 +1,70 @@
+version: '2'
+services:
+version: '2.2'
+services:
+  elasticsearch:
+    build:
+      context: elasticsearch/
+    container_name: elasticsearch
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ports:
+      - 9200:9200
+      - 9300:9300
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - esnet
+  elasticsearch2:
+    build:
+      context: elasticsearch/
+    container_name: elasticsearch2
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+    networks:
+      - esnet
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1 
+    depends_on:
+      - elasticsearch
+  elasticsearch3:
+    build:
+      context: elasticsearch/
+    container_name: elasticsearch3
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+    networks:
+      - esnet
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    depends_on:
+      - elasticsearch
+  kibana:
+    build:
+      context: kibana/
+    volumes:
+      - ./kibana/config/:/usr/share/kibana/config:ro
+    ports:
+      - "5601:5601"
+    networks:
+      - esnet
+    depends_on:
+      - elasticsearch
+      - elasticsearch2
+      - elasticsearch3
+networks:
+  esnet:
