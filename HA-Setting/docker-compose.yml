@@ -1,0 +1,57 @@
+version: '2'
+services:
+  elasticsearch1:
+    build:
+      context: elasticsearch/
+    container_name: elasticsearch1
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks:
+      - esnet
+  elasticsearch2:
+    build:
+      context: elasticsearch/
+    container_name: elasticsearch2
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    networks:
+      - esnet
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1 
+  elasticsearch3:
+    build:
+      context: elasticsearch/
+    container_name: elasticsearch3
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms256m -Xmx256m"
+    networks:
+      - esnet
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+  haproxy:
+    build:
+      context: haproxy/
+    ports:
+      - "9200:9200"
+    networks:
+      - esnet
+    depends_on:
+      - elasticsearch1
+      - elasticsearch2
+      - elasticsearch3
+networks:
+  esnet:
